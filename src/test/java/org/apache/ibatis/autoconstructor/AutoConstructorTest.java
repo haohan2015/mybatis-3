@@ -1,5 +1,5 @@
 /**
- *    Copyright 2009-2019 the original author or authors.
+ *    Copyright 2009-2020 the original author or authors.
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -37,11 +37,13 @@ class AutoConstructorTest {
   @BeforeAll
   static void setUp() throws Exception {
     // create a SqlSessionFactory
+    // 创建 SqlSessionFactory 对象，基于 mybatis-config.xml 配置文件。
     try (Reader reader = Resources.getResourceAsReader("org/apache/ibatis/autoconstructor/mybatis-config.xml")) {
       sqlSessionFactory = new SqlSessionFactoryBuilder().build(reader);
     }
 
     // populate in-memory database
+    // 初始化数据到内存数据库，基于 CreateDB.sql SQL 文件。
     BaseDataTest.runScript(sqlSessionFactory.getConfiguration().getEnvironment().getDataSource(),
         "org/apache/ibatis/autoconstructor/CreateDB.sql");
   }
