@@ -171,21 +171,27 @@ public class Reflector {
         Class<?> candidateType = candidate.getReturnType();
         // 类型相同
         if (candidateType.equals(winnerType)) {
+          // 返回值了诶选哪个相同，应该在 getClassMethods 方法中，已经合并。认为是模糊的
           if (!boolean.class.equals(candidateType)) {
             isAmbiguous = true;
             break;
+            // 选择 boolean 类型的 is 方法
           } else if (candidate.getName().startsWith("is")) {
             winner = candidate;
           }
+          // 不符合选择子类
         } else if (candidateType.isAssignableFrom(winnerType)) {
           // OK getter type is descendant
+          // <1.1> 符合选择子类。因为子类可以修改放大返回值。例如，父类的一个方法的返回值为 List ，子类对该方法的返回值可以覆写为 ArrayList 。
         } else if (winnerType.isAssignableFrom(candidateType)) {
           winner = candidate;
         } else {
+          //认为是模糊的
           isAmbiguous = true;
           break;
         }
       }
+      // <2> 添加到 getMethods 和 getTypes 中
       addGetMethod(propName, winner, isAmbiguous);
     }
   }
@@ -196,16 +202,26 @@ public class Reflector {
             "Illegal overloaded getter method with ambiguous type for property ''{0}'' in class ''{1}''. This breaks the JavaBeans specification and can cause unpredictable results.",
             name, method.getDeclaringClass().getName()))
         : new MethodInvoker(method);
+    // <2.2> 添加到 getMethods 中
     getMethods.put(name, invoker);
+    // <2.3> 添加到 getTypes 中
     Type returnType = TypeParameterResolver.resolveReturnType(method, type);
     getTypes.put(name, typeToClass(returnType));
   }
 
   private void addSetMethods(Class<?> clazz) {
+    // 属性与其 setting 方法的映射。
     Map<String, List<Method>> conflictingSetters = new HashMap<>();
+    // 获得所有方法
     Method[] methods = getClassMethods(clazz);
+    // 遍历所有方法
+    // <1> 方法名为 set 开头
+    // 参数数量为 1
+    // 获得属性
+    // 添加到 conflictingSetters 中
     Arrays.stream(methods).filter(m -> m.getParameterTypes().length == 1 && PropertyNamer.isSetter(m.getName()))
       .forEach(m -> addMethodConflict(conflictingSetters, PropertyNamer.methodToProperty(m.getName()), m));
+    // <2> 解决 setting 冲突方法
     resolveSetterConflicts(conflictingSetters);
   }
 
@@ -217,23 +233,31 @@ public class Reflector {
   }
 
   private void resolveSetterConflicts(Map<String, List<Method>> conflictingSetters) {
+    // 遍历每个属性，查找其最匹配的方法。因为子类可以覆写父类的方法，所以一个属性，可能对应多个 setting 方法
     for (String propName : conflictingSetters.keySet()) {
       List<Method> setters = conflictingSetters.get(propName);
       Class<?> getterType = getTypes.get(propName);
+      //该属性对应的get方法是否是模糊的
       boolean isGetterAmbiguous = getMethods.get(propName) instanceof AmbiguousMethodInvoker;
+      //该属性对应的set方法是否是模糊的
       boolean isSetterAmbiguous = false;
       Method match = null;
+      // <1> 遍历属性对应的 setting 方法
       for (Method setter : setters) {
+        // 如果get不是模糊的，并且和 getterType 相同，直接使用
         if (!isGetterAmbiguous && setter.getParameterTypes()[0].equals(getterType)) {
           // should be the best match
           match = setter;
           break;
         }
         if (!isSetterAmbiguous) {
+          // 选择一个更加匹配的
           match = pickBetterSetter(match, setter, propName);
+          //返回Null代表存在模糊的方法
           isSetterAmbiguous = match == null;
         }
       }
+      // <2> 添加到 setMethods 和 setTypes 中
       if (match != null) {
         addSetMethod(propName, match);
       }
@@ -251,6 +275,7 @@ public class Reflector {
     } else if (paramType2.isAssignableFrom(paramType1)) {
       return setter1;
     }
+    //如果纯在模糊的set方法
     MethodInvoker invoker = new AmbiguousMethodInvoker(setter1,
         MessageFormat.format(
             "Ambiguous setters defined for property ''{0}'' in class ''{1}'' with types ''{2}'' and ''{3}''.",
@@ -263,26 +288,34 @@ public class Reflector {
 
   private void addSetMethod(String name, Method method) {
     MethodInvoker invoker = new MethodInvoker(method);
+    // 添加到 setMethods 中
     setMethods.put(name, invoker);
     Type[] paramTypes = TypeParameterResolver.resolveParamTypes(method, type);
+    // 添加到 setTypes 中
     setTypes.put(name, typeToClass(paramTypes[0]));
   }
 
   private Class<?> typeToClass(Type src) {
     Class<?> result = null;
+    // 普通类型，直接使用类
     if (src instanceof Class) {
       result = (Class<?>) src;
+      // 泛型类型，使用泛型
     } else if (src instanceof ParameterizedType) {
       result = (Class<?>) ((ParameterizedType) src).getRawType();
+      // 泛型数组，获得具体类
     } else if (src instanceof GenericArrayType) {
       Type componentType = ((GenericArrayType) src).getGenericComponentType();
       if (componentType instanceof Class) {
+        // 普通类型
         result = Array.newInstance((Class<?>) componentType, 0).getClass();
       } else {
+        // 递归该方法，返回类
         Class<?> componentClass = typeToClass(componentType);
         result = Array.newInstance(componentClass, 0).getClass();
       }
     }
+    // 都不符合，使用 Object 类
     if (result == null) {
       result = Object.class;
     }
