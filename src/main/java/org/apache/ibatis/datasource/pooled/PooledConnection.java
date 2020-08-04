@@ -28,12 +28,34 @@ import org.apache.ibatis.reflection.ExceptionUtil;
  */
 class PooledConnection implements InvocationHandler {
 
+  /**
+   * 关闭 Connection 方法名
+   */
   private static final String CLOSE = "close";
+
+  /**
+   * JDK Proxy 的接口
+   */
   private static final Class<?>[] IFACES = new Class<?>[] { Connection.class };
 
+  /**
+   * 对象的标识，基于 {@link #realConnection} 求 hashCode
+   */
   private final int hashCode;
+
+  /**
+   * 所属的 PooledDataSource 对象
+   */
   private final PooledDataSource dataSource;
+
+  /**
+   * 真实的 Connection 连接
+   */
   private final Connection realConnection;
+
+  /**
+   * 代理的 Connection 连接，即 {@link PooledConnection} 这个动态代理的 Connection 对象
+   */
   private final Connection proxyConnection;
   private long checkoutTimestamp;
   private long createdTimestamp;

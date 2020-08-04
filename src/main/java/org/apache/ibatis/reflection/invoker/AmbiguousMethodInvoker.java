@@ -21,6 +21,9 @@ import java.lang.reflect.Method;
 
 import org.apache.ibatis.reflection.ReflectionException;
 
+/**
+ * 模糊执行器，说明同样的方法在父类中定义了，并且在子类中也定义了，执行的时候直接抛出异常
+ */
 public class AmbiguousMethodInvoker extends MethodInvoker {
   private final String exceptionMessage;
 

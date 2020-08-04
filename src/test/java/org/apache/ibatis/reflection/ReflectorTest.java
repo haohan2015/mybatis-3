@@ -19,8 +19,11 @@ import static org.junit.jupiter.api.Assertions.*;
 
 import java.io.Serializable;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 
+import org.apache.ibatis.domain.misc.CustomBeanWrapperFactory;
+import org.apache.ibatis.domain.misc.RichType;
 import org.apache.ibatis.reflection.invoker.Invoker;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -70,6 +73,21 @@ class ReflectorTest {
     public void setId(Long id) {
       this.id = id;
     }
+  }
+
+  @Test
+  public void test01() {
+    RichType object = new RichType();
+
+    if (true) {
+      object.setRichType(new RichType());
+      object.getRichType().setRichMap(new HashMap());
+      object.getRichType().getRichMap().put("nihao", "123");
+    }
+
+    MetaObject meta = MetaObject.forObject(object, SystemMetaObject.DEFAULT_OBJECT_FACTORY, new CustomBeanWrapperFactory(), new DefaultReflectorFactory());
+    Class<?> clazz = meta.getObjectWrapper().getGetterType("richType.richMap.nihao");
+    System.out.println(clazz);
   }
 
   static class Section extends AbstractEntity implements Entity<Long> {

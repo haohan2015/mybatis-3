@@ -1,5 +1,5 @@
 /**
- *    Copyright 2009-2019 the original author or authors.
+ *    Copyright 2009-2020 the original author or authors.
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -114,7 +114,7 @@ public class Reflector {
     addDefaultConstructor(clazz);
     // <2> // 初始化 getMethods 和 getTypes ，通过遍历 getting 方法
     addGetMethods(clazz);
-    // <3> // 初始化 setMethods 和 setTypes ，通过遍历 setting 方法。
+    // <3> //初始化 setMethods 和 setTypes ，通过遍历 setting 方法。
     addSetMethods(clazz);
     // <4> // 初始化 getMethods + getTypes 和 setMethods + setTypes ，通过遍历 fields 属性。
     addFields(clazz);
@@ -129,6 +129,10 @@ public class Reflector {
     }
   }
 
+  /**
+   * 活动编辑
+   * @param clazz
+   */
   private void addDefaultConstructor(Class<?> clazz) {
     // 获得所有构造方法
     // 遍历所有构造方法，查找无参的构造方法
@@ -275,7 +279,7 @@ public class Reflector {
     } else if (paramType2.isAssignableFrom(paramType1)) {
       return setter1;
     }
-    //如果纯在模糊的set方法
+    //如果存在模糊的set方法
     MethodInvoker invoker = new AmbiguousMethodInvoker(setter1,
         MessageFormat.format(
             "Ambiguous setters defined for property ''{0}'' in class ''{1}'' with types ''{2}'' and ''{3}''.",
@@ -323,37 +327,48 @@ public class Reflector {
   }
 
   private void addFields(Class<?> clazz) {
+    // 获得所有 field 们
     Field[] fields = clazz.getDeclaredFields();
     for (Field field : fields) {
+      // <1> 添加到 setMethods 和 setTypes 中
       if (!setMethods.containsKey(field.getName())) {
         // issue #379 - removed the check for final because JDK 1.5 allows
         // modification of final fields through reflection (JSR-133). (JGB)
         // pr #16 - final static can only be set by the classloader
         int modifiers = field.getModifiers();
+        //既不是final也不是static修饰
         if (!(Modifier.isFinal(modifiers) && Modifier.isStatic(modifiers))) {
           addSetField(field);
         }
       }
+      // 添加到 getMethods 和 getTypes 中
       if (!getMethods.containsKey(field.getName())) {
         addGetField(field);
       }
     }
+    // 递归，处理父类
     if (clazz.getSuperclass() != null) {
       addFields(clazz.getSuperclass());
     }
   }
 
   private void addSetField(Field field) {
+    // 判断是合理的属性
     if (isValidPropertyName(field.getName())) {
+      // 添加到 setMethods 中
       setMethods.put(field.getName(), new SetFieldInvoker(field));
+      // 添加到 setTypes 中
       Type fieldType = TypeParameterResolver.resolveFieldType(field, type);
       setTypes.put(field.getName(), typeToClass(fieldType));
     }
   }
 
   private void addGetField(Field field) {
+    // 判断是合理的属性
     if (isValidPropertyName(field.getName())) {
+      // 添加到 getMethods 中
       getMethods.put(field.getName(), new GetFieldInvoker(field));
+      // 添加到 getMethods 中
       Type fieldType = TypeParameterResolver.resolveFieldType(field, type);
       getTypes.put(field.getName(), typeToClass(fieldType));
     }
@@ -403,6 +418,8 @@ public class Reflector {
       // 忽略 bridge 方法，参见 https://www.zhihu.com/question/54895701/answer/141623158 文章
       if (!currentMethod.isBridge()) {
         // <3> 获得方法签名
+        //org.apache.ibatis.domain.misc.RichType#getRichType
+        //java.util.List#getRichList
         String signature = getSignature(currentMethod);
         // check to see if the method is already known
         // if it is known, then an extended class must have
