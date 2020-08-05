@@ -31,7 +31,7 @@ import java.lang.annotation.Target;
  * public class UserEmail {
  *   // ...
  * }
- * </pre>
+ * </pre> 别名的注解
  * @author Clinton Begin
  */
 @Documented

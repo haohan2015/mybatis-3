@@ -53,7 +53,7 @@ import org.apache.ibatis.logging.LogFactory;
  * resolver.find(new CustomTest(), pkg2);
  * Collection&lt;ActionBean&gt; beans = resolver.getClasses();
  * </pre>
- *
+ * 解析器工具类，用于获得指定目录符合条件的类们
  * @author Tim Fennell
  */
 public class ResolverUtil<T> {
@@ -65,6 +65,7 @@ public class ResolverUtil<T> {
   /**
    * A simple interface that specifies how to test classes to determine if they
    * are to be included in the results produced by the ResolverUtil.
+   * 匹配判断接口
    */
   public interface Test {
     /**
@@ -77,8 +78,13 @@ public class ResolverUtil<T> {
   /**
    * A Test that checks to see if each class is assignable to the provided class. Note
    * that this test will match the parent type itself if it is presented for matching.
+   * 实现 Test 接口，判断是否为指定类
    */
   public static class IsA implements Test {
+
+    /**
+     * 指定类
+     */
     private Class<?> parent;
 
     /** Constructs an IsA test using the supplied Class as the parent class/interface. */
@@ -103,6 +109,10 @@ public class ResolverUtil<T> {
    * is, then the test returns true, otherwise false.
    */
   public static class AnnotatedWith implements Test {
+
+    /**
+     * 注解
+     */
     private Class<? extends Annotation> annotation;
 
     /** Constructs an AnnotatedWith test for the specified annotation type. */
@@ -123,6 +133,9 @@ public class ResolverUtil<T> {
   }
 
   /** The set of matches being accumulated. */
+  /**
+   * 符合条件的类的集合
+   */
   private Set<Class<? extends T>> matches = new HashSet<>();
 
   /**
@@ -208,18 +221,23 @@ public class ResolverUtil<T> {
    * Each class is offered up to the Test as it is discovered, and if the Test returns
    * true the class is retained.  Accumulated classes can be fetched by calling
    * {@link #getClasses()}.
-   *
+   * 获得指定包下，符合条件的类
    * @param test an instance of {@link Test} that will be used to filter classes
    * @param packageName the name of the package from which to start scanning for
    *        classes, e.g. {@code net.sourceforge.stripes}
    */
   public ResolverUtil<T> find(Test test, String packageName) {
+    // <1> 获得包的路径
     String path = getPackagePath(packageName);
 
     try {
+      // <2> 获得路径下的所有文件
       List<String> children = VFS.getInstance().list(path);
+      // <3> 遍历
       for (String child : children) {
+        // 是 Java Class
         if (child.endsWith(".class")) {
+          // 如果匹配，则添加到结果集
           addIfMatching(test, child);
         }
       }
@@ -250,13 +268,16 @@ public class ResolverUtil<T> {
   @SuppressWarnings("unchecked")
   protected void addIfMatching(Test test, String fqn) {
     try {
+      // 获得全类名
       String externalName = fqn.substring(0, fqn.indexOf('.')).replace('/', '.');
       ClassLoader loader = getClassLoader();
       if (log.isDebugEnabled()) {
         log.debug("Checking to see if class " + externalName + " matches criteria [" + test + "]");
       }
 
+      // 加载类
       Class<?> type = loader.loadClass(externalName);
+      // 判断是否匹配
       if (test.matches(type)) {
         matches.add((Class<T>) type);
       }

@@ -36,7 +36,7 @@ import org.apache.ibatis.logging.LogFactory;
 
 /**
  * A default implementation of {@link VFS} that works for most application servers.
- *
+ * 继承 VFS 抽象类，默认的 VFS 实现类
  * @author Ben Gunter
  */
 public class DefaultVFS extends VFS {
@@ -58,17 +58,20 @@ public class DefaultVFS extends VFS {
 
       // First, try to find the URL of a JAR file containing the requested resource. If a JAR
       // file is found, then we'll list child resources by reading the JAR.
+      // 如果 url 指向的是 Jar Resource ，则返回该 Jar Resource ，否则返回 null
       URL jarUrl = findJarForResource(url);
       if (jarUrl != null) {
         is = jarUrl.openStream();
         if (log.isDebugEnabled()) {
           log.debug("Listing " + url);
         }
+        // 遍历 Jar Resource
         resources = listResources(new JarInputStream(is), path);
       }
       else {
         List<String> children = new ArrayList<>();
         try {
+          // 判断为 JAR URL
           if (isJar(url)) {
             // Some versions of JBoss VFS might give a JAR stream even if the resource
             // referenced by the URL isn't actually a JAR

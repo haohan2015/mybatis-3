@@ -22,10 +22,20 @@ import java.sql.SQLException;
 
 /**
  * @author Clinton Begin
+ * 继承 BaseTypeHandler 抽象类，Enum 类型的 TypeHandler 实现类
  */
 public class EnumOrdinalTypeHandler<E extends Enum<E>> extends BaseTypeHandler<E> {
 
+  /**
+   * 枚举类
+   */
   private final Class<E> type;
+
+  /**
+   * {@link #type} 下所有的枚举
+   *
+   * @see Class#getEnumConstants()
+   */
   private final E[] enums;
 
   public EnumOrdinalTypeHandler(Class<E> type) {

@@ -31,7 +31,7 @@ import java.lang.annotation.Target;
  * public class StringTrimmingTypeHandler implements TypeHandler&lt;String&gt; {
  *   // ...
  * }
- * </pre>
+ * </pre> 匹配的 JDBC Type 类型的注解
  * @author Eduardo Macarron
  */
 @Documented
