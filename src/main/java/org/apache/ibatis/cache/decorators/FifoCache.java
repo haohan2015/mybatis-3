@@ -22,17 +22,29 @@ import org.apache.ibatis.cache.Cache;
 
 /**
  * FIFO (first in, first out) cache decorator.
- *
+ *  实现 Cache 接口，基于先进先出的淘汰机制的 Cache 实现类
  * @author Clinton Begin
  */
 public class FifoCache implements Cache {
 
+  /**
+   * 装饰的 Cache 对象
+   */
   private final Cache delegate;
+
+  /**
+   * 双端队列，记录缓存键的添加
+   */
   private final Deque<Object> keyList;
+
+  /**
+   * 队列上限
+   */
   private int size;
 
   public FifoCache(Cache delegate) {
     this.delegate = delegate;
+    // 使用了 LinkedList
     this.keyList = new LinkedList<>();
     this.size = 1024;
   }
@@ -53,6 +65,7 @@ public class FifoCache implements Cache {
 
   @Override
   public void putObject(Object key, Object value) {
+    // 循环 keyList
     cycleKeyList(key);
     delegate.putObject(key, value);
   }
@@ -64,6 +77,7 @@ public class FifoCache implements Cache {
 
   @Override
   public Object removeObject(Object key) {
+    // <2> 此处，理论应该也要移除 keyList 呀
     return delegate.removeObject(key);
   }
 
@@ -74,7 +88,9 @@ public class FifoCache implements Cache {
   }
 
   private void cycleKeyList(Object key) {
+    // <1> 添加到 keyList 对位
     keyList.addLast(key);
+    // 超过上限，将队首位移除
     if (keyList.size() > size) {
       Object oldestKey = keyList.removeFirst();
       delegate.removeObject(oldestKey);

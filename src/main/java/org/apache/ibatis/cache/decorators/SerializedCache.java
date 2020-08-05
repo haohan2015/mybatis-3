@@ -30,9 +30,13 @@ import org.apache.ibatis.io.Resources;
 
 /**
  * @author Clinton Begin
+ * 实现 Cache 接口，支持序列化值的 Cache 实现类
  */
 public class SerializedCache implements Cache {
 
+  /**
+   * 装饰的 Cache 对象
+   */
   private final Cache delegate;
 
   public SerializedCache(Cache delegate) {
@@ -52,6 +56,7 @@ public class SerializedCache implements Cache {
   @Override
   public void putObject(Object key, Object object) {
     if (object == null || object instanceof Serializable) {
+      // 序列化
       delegate.putObject(key, serialize((Serializable) object));
     } else {
       throw new CacheException("SharedCache failed to make a copy of a non-serializable object: " + object);
@@ -61,6 +66,7 @@ public class SerializedCache implements Cache {
   @Override
   public Object getObject(Object key) {
     Object object = delegate.getObject(key);
+    // 反序列化
     return object == null ? null : deserialize((byte[]) object);
   }
 
@@ -114,6 +120,7 @@ public class SerializedCache implements Cache {
 
     @Override
     protected Class<?> resolveClass(ObjectStreamClass desc) throws ClassNotFoundException {
+      // 解析类
       return Resources.classForName(desc.getName());
     }
 

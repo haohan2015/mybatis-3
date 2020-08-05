@@ -35,7 +35,7 @@ import java.util.concurrent.locks.ReadWriteLock;
  *  initialize();
  * }
  * </pre>
- *
+ * 注意，它是一个容器，有点类似 HashMap ，可以往其中添加各种缓存
  * @author Clinton Begin
  */
 
@@ -46,13 +46,13 @@ public interface Cache {
    */
   String getId();
 
-  /**
+  /** 添加指定键的值
    * @param key Can be any object but usually it is a {@link CacheKey}
    * @param value The result of a select.
    */
   void putObject(Object key, Object value);
 
-  /**
+  /** 获得指定键的值
    * @param key The key
    * @return The object stored in the cache.
    */
@@ -67,7 +67,7 @@ public interface Cache {
    * and releases it when the value is back again.
    * This way other threads will wait for the value to be
    * available instead of hitting the database.
-   *
+   * 移除指定键的值
    *
    * @param key The key
    * @return Not used
@@ -76,12 +76,13 @@ public interface Cache {
 
   /**
    * Clears this cache instance.
+   * 清空缓存
    */
   void clear();
 
   /**
    * Optional. This method is not called by the core.
-   *
+   * 获得容器中缓存的数量
    * @return The number of elements stored in the cache (not its capacity).
    */
   int getSize();
@@ -90,7 +91,7 @@ public interface Cache {
    * Optional. As of 3.2.6 this method is no longer called by the core.
    * <p>
    * Any locking needed by the cache must be provided internally by the cache provider.
-   *
+   * 获得读取写锁。该方法可以忽略了已经。
    * @return A ReadWriteLock
    */
   default ReadWriteLock getReadWriteLock() {
