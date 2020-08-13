@@ -29,6 +29,9 @@ import org.apache.ibatis.session.Configuration;
  */
 public class TrimSqlNode implements SqlNode {
 
+  /**
+   * 内含的 SqlNode 节点
+   */
   private final SqlNode contents;
   private final String prefix;
   private final String suffix;
