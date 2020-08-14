@@ -32,7 +32,7 @@
         )
 	</select>
 
-  <select id="countByUserList" resultType="_int" parameterType="list">
+  <!--<select id="countByUserList" resultType="_int" parameterType="list">
     select count(*) from users
       <where>
         id in
@@ -91,5 +91,5 @@
       #{idx} + 2
     </foreach>
     or id = #{idx}
-  </select>
+  </select>-->
 </mapper>

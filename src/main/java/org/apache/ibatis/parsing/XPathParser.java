@@ -147,6 +147,7 @@ public class XPathParser {
 
   public XPathParser(Reader reader, boolean validation, Properties variables, EntityResolver entityResolver) {
     commonConstructor(validation, variables, entityResolver);
+    //mybatis的config的domcument
     this.document = createDocument(new InputSource(reader));
   }
 
@@ -313,6 +314,7 @@ public class XPathParser {
 
   private void commonConstructor(boolean validation, Properties variables, EntityResolver entityResolver) {
     this.validation = validation;
+    //此处的真实类型是XMLMapperEntityResolver
     this.entityResolver = entityResolver;
     this.variables = variables;
     // 创建 XPathFactory 对象

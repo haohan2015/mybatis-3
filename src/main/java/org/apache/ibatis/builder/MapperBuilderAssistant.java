@@ -86,6 +86,7 @@ public class MapperBuilderAssistant extends BaseBuilder {
   }
 
   public void setCurrentNamespace(String currentNamespace) {
+    //currentNameSpace类似org.apache.ibatis.submitted.foreach.User
     // 如果传入的 currentNamespace 参数为空，抛出 BuilderException 异常
     if (currentNamespace == null) {
       throw new BuilderException("The mapper element requires a namespace attribute to be specified.");

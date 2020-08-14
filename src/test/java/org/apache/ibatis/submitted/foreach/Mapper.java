@@ -23,7 +23,7 @@ public interface Mapper {
 
   User getUser(User user);
 
-  int countByUserList(List<User> users);
+/*  int countByUserList(List<User> users);
 
   int countByBestFriend(List<User> users);
 
@@ -33,5 +33,5 @@ public interface Mapper {
 
   int itemVariableConflict(@Param("id") Integer id, @Param("ids") List<Integer> ids, @Param("ids2") List<Integer> ids2);
 
-  int indexVariableConflict(@Param("idx") Integer id, @Param("idxs") List<Integer> ids, @Param("idxs2") List<Integer> ids2);
+  int indexVariableConflict(@Param("idx") Integer id, @Param("idxs") List<Integer> ids, @Param("idxs2") List<Integer> ids2);*/
 }

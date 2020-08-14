@@ -41,9 +41,12 @@ public class XNode {
 
   public XNode(XPathParser xpathParser, Node node, Properties variables) {
     this.xpathParser = xpathParser;
+    //节点
     this.node = node;
+    //节点名称
     this.name = node.getNodeName();
     this.variables = variables;
+    //从节点获取属性
     this.attributes = parseAttributes(node);
     this.body = parseBody(node);
   }
