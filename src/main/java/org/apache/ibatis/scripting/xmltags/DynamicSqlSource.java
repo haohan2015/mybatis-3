@@ -22,10 +22,15 @@ import org.apache.ibatis.session.Configuration;
 
 /**
  * @author Clinton Begin
+ * 实现 SqlSource 接口，动态的 SqlSource 实现类。
  */
 public class DynamicSqlSource implements SqlSource {
 
   private final Configuration configuration;
+
+  /**
+   * 根 SqlNode 对象
+   */
   private final SqlNode rootSqlNode;
 
   public DynamicSqlSource(Configuration configuration, SqlNode rootSqlNode) {
@@ -35,8 +40,10 @@ public class DynamicSqlSource implements SqlSource {
 
   @Override
   public BoundSql getBoundSql(Object parameterObject) {
+    // <1> 应用 rootSqlNode
     DynamicContext context = new DynamicContext(configuration, parameterObject);
     rootSqlNode.apply(context);
+    // <2> 创建 SqlSourceBuilder 对象
     SqlSourceBuilder sqlSourceParser = new SqlSourceBuilder(configuration);
     Class<?> parameterType = parameterObject == null ? Object.class : parameterObject.getClass();
     SqlSource sqlSource = sqlSourceParser.parse(context.getSql(), parameterType, context.getBindings());
