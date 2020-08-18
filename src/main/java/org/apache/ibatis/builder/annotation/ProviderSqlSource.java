@@ -32,17 +32,44 @@ import org.apache.ibatis.session.Configuration;
 /**
  * @author Clinton Begin
  * @author Kazuki Shimizu
+ * 实现 SqlSource 接口，基于方法上的 @ProviderXXX 注解的 SqlSource 实现类。
  */
 public class ProviderSqlSource implements SqlSource {
 
   private final Configuration configuration;
+
+  /**
+   * `@ProviderXXX` 注解的对应的类
+   */
   private final Class<?> providerType;
+
   private final LanguageDriver languageDriver;
+
   private final Method mapperMethod;
+
+  /**
+   * `@ProviderXXX` 注解的对应的方法
+   */
   private final Method providerMethod;
+
+  /**
+   * `@ProviderXXX` 注解的对应的方法的参数名数组
+   */
   private final String[] providerMethodArgumentNames;
+
+  /**
+   * `@ProviderXXX` 注解的对应的方法的参数类型数组
+   */
   private final Class<?>[] providerMethodParameterTypes;
+
+  /**
+   * 若 {@link #providerMethodParameterTypes} 参数有 ProviderContext 类型的，创建 ProviderContext 对象
+   */
   private final ProviderContext providerContext;
+
+  /**
+   * {@link #providerMethodParameterTypes} 参数中，ProviderContext 类型的参数，在数组中的位置
+   */
   private final Integer providerContextIndex;
 
   /**

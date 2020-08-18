@@ -92,6 +92,7 @@ public class SqlSourceBuilder extends BaseBuilder {
 
     @Override
     public String handleToken(String content) {
+      //此处的content类似__frch_item_0.id
       // <1> 构建 ParameterMapping 对象，并添加到 parameterMappings 中
       parameterMappings.add(buildParameterMapping(content));
       // <2> 返回 ? 占位符

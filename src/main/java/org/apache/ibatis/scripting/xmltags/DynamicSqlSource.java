@@ -45,10 +45,15 @@ public class DynamicSqlSource implements SqlSource {
     rootSqlNode.apply(context);
     // <2> 创建 SqlSourceBuilder 对象
     SqlSourceBuilder sqlSourceParser = new SqlSourceBuilder(configuration);
+    // <2> 解析出 SqlSource 对象
     Class<?> parameterType = parameterObject == null ? Object.class : parameterObject.getClass();
     SqlSource sqlSource = sqlSourceParser.parse(context.getSql(), parameterType, context.getBindings());
+
+    // <3> 获得 BoundSql 对象
     BoundSql boundSql = sqlSource.getBoundSql(parameterObject);
+    // <4> 添加附加参数到 BoundSql 对象中
     context.getBindings().forEach(boundSql::setAdditionalParameter);
+    // <5> 返回 BoundSql 对象
     return boundSql;
   }
 
